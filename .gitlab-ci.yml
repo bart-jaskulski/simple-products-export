@@ -1,0 +1,6 @@
+variables:
+  DISABLE_PHP_5_5: 1
+  DISABLE_ACCEPTANCE: "1"
+  DISABLE_FUNCTIONAL: "1"
+
+include: 'https://gitlab.com/wpdesk/gitlab-ci/raw/master/gitlab-ci-shop.yml'

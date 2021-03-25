@@ -1,0 +1,8 @@
+/vendor/
+/vendor_prefixed/
+.idea
+build-coverage
+.DS_Store
+.commit
+lang/simple-products-export-pl_PL.po
+lang/simple-products-export-pl_PL.mo

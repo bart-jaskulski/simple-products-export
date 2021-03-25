@@ -1,0 +1,18 @@
+<phpunit bootstrap="tests/unit/bootstrap.php">
+    <testsuites>
+        <testsuite>
+            <directory suffix="Test.php">./tests/unit/</directory>
+        </testsuite>
+    </testsuites>
+
+	<filter>
+		<whitelist>
+			<directory suffix=".php">src</directory>
+			<exclude>
+				<directory suffix=".php">src/WooCommerceShipping/CustomFields/Templates</directory>
+				<directory suffix=".php">src/plugin/view</directory>
+			</exclude>
+		</whitelist>
+	</filter>
+
+</phpunit>
