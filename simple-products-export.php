@@ -35,7 +35,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /* THESE TWO VARIABLES CAN BE CHANGED AUTOMATICALLY */
 $plugin_version           = '1.0.0';
-$plugin_release_timestamp = '2021-03-25 09:49';
+$plugin_release_timestamp = '2021-03-25 08:49';
 
 $plugin_name        = 'Simple products export for WooCommerce';
 $plugin_class_name  = '\WPDesk\SimpleProductsExport\Plugin';
@@ -45,13 +45,13 @@ $plugin_file        = __FILE__;
 $plugin_dir         = dirname( __FILE__ );
 
 $requirements = [
-	'php'     => '5.6',
-	'wp'      => '4.5',
+	'php'     => '7.1',
+	'wp'      => '5.7',
 	'plugins' => [
 		[
 			'name'      => 'woocommerce/woocommerce.php',
 			'nice_name' => 'WooCommerce',
-			'version'   => '3.0',
+			'version'   => '5.0',
 		],
 	],
 ];
