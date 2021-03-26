@@ -14,6 +14,10 @@ use SimpleProductsExportVendor\WPDesk_Plugin_Info;
 use SimpleProductsExportVendor\WPDesk\PluginBuilder\Plugin\AbstractPlugin;
 use SimpleProductsExportVendor\WPDesk\PluginBuilder\Plugin\HookableCollection;
 use SimpleProductsExportVendor\WPDesk\PluginBuilder\Plugin\HookableParent;
+use League\Csv\Writer;
+use \SplTempFileObject;
+use \WC_Product_Query;
+
 
 /**
  * Main plugin class. The most important flow decisions are made here.
@@ -56,5 +60,27 @@ class Plugin extends AbstractPlugin implements LoggerAwareInterface, HookableCol
 	 */
 	public function hooks() {
 		parent::hooks();
+		add_action( 'admin_menu', array( Admin::class, 'init_admin_ui' ) );
+		add_action( 'admin_post_simple_products_export', array( $this, 'process_request' ) );
+	}
+
+	/**
+	 * Create objects for getting and saving data, then send them to exporter and collect csv.
+	 *
+	 * @return void
+	 */
+	public function process_request() {
+		$data   = new Product_Data( new WC_Product_Query( $this->query_arguments() ) );
+		$writer = Writer::createFromFileObject( new SplTempFileObject() );
+
+		$export = new Export( $data, $writer );
+		$export->export_file();
+		die;
+	}
+
+	private function query_arguments() {
+		return array(
+			'limit' => -1,
+		);
 	}
 }
