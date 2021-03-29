@@ -1,4 +1,9 @@
 <?php
+/**
+ * Products data for CSV file.
+ *
+ * @package WPDesk\SimpleProductsExport
+ */
 
 namespace WPDesk\SimpleProductsExport;
 
@@ -12,11 +17,11 @@ use \Exception;
 class Product_Data implements Data_Interface {
 
 	/**
-	 * WC_Product_Query instance.
+	 * Array of WC_Product objects.
 	 *
-	 * @var \WC_Product_Query
+	 * @var array
 	 */
-	protected $query;
+	protected $products;
 
 	/**
 	 * Key-value pair of property name and corresponding column name.
@@ -25,8 +30,13 @@ class Product_Data implements Data_Interface {
 	 */
 	protected $columns;
 
-	public function __construct( \WC_Product_Query $query ) {
-		$this->query = $query;
+	/**
+	 * Product data constructor.
+	 *
+	 * @param  array $products Already set query instance.
+	 */
+	public function __construct( $products ) {
+		$this->products = $products;
 
 		$this->columns = array(
 			'title'         => __( 'Product name', 'simple-products-export' ),
@@ -53,22 +63,20 @@ class Product_Data implements Data_Interface {
 	 */
 	public function get_rows() {
 		$products_for_export = array();
-		$product_query = $this->query->get_products();
+		$product_query       = $this->products;
 		if ( empty( $product_query ) ) {
-			wp_die( esc_html__( 'No products in the store.', 'simple-products-export' ) );
+			wp_send_json_error( array( __( 'No products in the store.', 'simple-products-export' ) ) );
 		}
 
-		if ( is_array( $product_query ) ) { // PHPStan made me do this...
-			foreach ( $product_query as $product ) {
-				// Call for column fields for each children if needed.
-				if ( $product->has_child() ) {
-					foreach ( $product->get_children() as $variation_id ) {
-						$variation_product     = \get_product( $variation_id );
-						$products_for_export[] = $this->get_product_fields( $variation_product );
-					}
+		foreach ( $product_query as $product ) {
+			// Call for column fields for each children if needed.
+			if ( $product->has_child() ) {
+				foreach ( $product->get_children() as $variation_id ) {
+					$variation_product     = \get_product( $variation_id );
+					$products_for_export[] = $this->get_product_fields( $variation_product );
 				}
-				$products_for_export[] = $this->get_product_fields( $product );
 			}
+			$products_for_export[] = $this->get_product_fields( $product );
 		}
 
 		return $products_for_export;
@@ -77,7 +85,7 @@ class Product_Data implements Data_Interface {
 	/**
 	 * Prepare fields to be inserted into columns from WC_Product.
 	 *
-	 * @param WC_Product $product
+	 * @param WC_Product $product WC_Product to get fileds from.
 	 * @return array
 	 * @throws Exception Throws when method from column mapping not found in WC_Product class.
 	 */
@@ -110,7 +118,7 @@ class Product_Data implements Data_Interface {
 	private function get_category_names( $cat_ids ) {
 		$cat_names = array();
 		foreach ( $cat_ids as $cat_id ) {
-			$category    = \get_term( $cat_id, 'product_cat' );
+			$category = \get_term( $cat_id, 'product_cat' );
 			if ( $category instanceof WP_Term ) {
 				$cat_names[] = $category->name;
 			}

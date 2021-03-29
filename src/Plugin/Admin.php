@@ -1,4 +1,9 @@
 <?php
+/**
+ * Adds admin UI interface for user.
+ *
+ * @package WPDesk\SimpleProductsExport
+ */
 
 namespace WPDesk\SimpleProductsExport;
 
@@ -6,20 +11,6 @@ namespace WPDesk\SimpleProductsExport;
  * Class for adding admin UI page.
  */
 class Admin {
-
-	private static $instance;
-
-	public static function init_admin_ui() {
-		if ( is_null( self::$instance ) ) {
-			self::$instance = new self();
-		}
-
-		return self::$instance;
-	}
-
-	public function __construct() {
-		$this->add_products_export_page();
-	}
 
 	/**
 	 * Register submenu page.
@@ -43,6 +34,6 @@ class Admin {
 	 * @return void
 	 */
 	public function render() {
-		include trailingslashit( dirname( __DIR__, 2 ) ) . 'templates/export.php';
+		include trailingslashit( dirname( __DIR__, 2 ) ) . 'templates/export.php'; // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.dirname_levelsFound
 	}
 }

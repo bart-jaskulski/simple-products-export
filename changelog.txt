@@ -1,5 +1,10 @@
 *** simple-products-export Changelog ***
 
-## [1.0.0] - 2017-06-20
+## [1.1.0] - 2021-03-29
+### Changed
+- Export request is made with AJAX now.
+
+## [1.0.0] - 2021-03-26
 ### Added
-- use https://keepachangelog.com/en/1.0.0/ standards in your changelog
+- Initial plugin version.
+- Exports all store products with POST request.

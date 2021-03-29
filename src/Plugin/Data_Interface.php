@@ -1,4 +1,9 @@
 <?php
+/**
+ * Interface for data exporting.
+ *
+ * @package WPDesk/SimpleProductsExport
+ */
 
 namespace WPDesk\SimpleProductsExport;
 

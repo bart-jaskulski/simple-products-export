@@ -1,4 +1,9 @@
 <?php
+/**
+ * File taking care of exporting CSV.
+ *
+ * @package WPDesk\SimpleProductsExport
+ */
 
 namespace WPDesk\SimpleProductsExport;
 
@@ -15,7 +20,6 @@ class Export {
 	 * @var Writer
 	 */
 	protected $writer;
-
 	/**
 	 * Data class.
 	 *
@@ -23,9 +27,17 @@ class Export {
 	 */
 	protected $data;
 
+	/**
+	 * Inject dependencies into object.
+	 *
+	 * @param  Data_Interface $data Object implementing Data_Interface.
+	 * @param  Writer         $writer PHP League CSV instance.
+	 */
 	public function __construct( Data_Interface $data, Writer $writer ) {
 		$this->data   = $data;
 		$this->writer = $writer;
+
+		$this->write_to_file();
 	}
 
 	/**
@@ -33,44 +45,31 @@ class Export {
 	 *
 	 * @return void
 	 */
-	public function export_file() {
-		if ( ! $this->is_request_valid() ) {
-			return;
+	public function write_to_file() {
+		if ( isset( $_POST['page'] ) && 1 === absint( $_POST['page'] ) ) { // phpcs:ignore
+			$this->insert_header( $this->data->get_header() );
 		}
 
-		if ( ! current_user_can( 'export' ) ) {
-			wp_die( esc_html__( 'You don\'t have permission to export files.', 'simple-products-export' ) );
-		}
-
-		$this->insert_header( $this->data->get_header() );
 		$this->insert_rows( $this->data->get_rows() );
-
-		$this->writer->output( $this->build_file_name() );
 	}
 
 	/**
-	 * Create nice name with shop name and timestamp for export.
+	 * Puts header into CSV file.
 	 *
-	 * @return string
+	 * @param array $header Array of column headings.
+	 * @return void
 	 */
-	protected function build_file_name() {
-		return sanitize_file_name( get_bloginfo( 'name' ) . '-' . __( 'Products', 'simple-products-export' ) . '-' . gmdate( 'Y-m-d-H-i' ) . '.csv' );
-	}
-
 	protected function insert_header( $header ) {
 		$this->writer->insertOne( $header );
 	}
 
+	/**
+	 * Puts all content into CSV file.
+	 *
+	 * @param  array $rows Array of rows to insert.
+	 * @return void
+	 */
 	protected function insert_rows( $rows ) {
 		$this->writer->insertAll( $rows );
-	}
-
-	/**
-	 * Validate request's nonce.
-	 *
-	 * @return bool
-	 */
-	private function is_request_valid() {
-		return ! empty( $_POST ) && check_admin_referer( 'simple-products-export' );
 	}
 }

@@ -14,10 +14,6 @@ use SimpleProductsExportVendor\WPDesk_Plugin_Info;
 use SimpleProductsExportVendor\WPDesk\PluginBuilder\Plugin\AbstractPlugin;
 use SimpleProductsExportVendor\WPDesk\PluginBuilder\Plugin\HookableCollection;
 use SimpleProductsExportVendor\WPDesk\PluginBuilder\Plugin\HookableParent;
-use League\Csv\Writer;
-use \SplTempFileObject;
-use \WC_Product_Query;
-
 
 /**
  * Main plugin class. The most important flow decisions are made here.
@@ -27,6 +23,13 @@ use \WC_Product_Query;
 class Plugin extends AbstractPlugin implements LoggerAwareInterface, HookableCollection {
 	use LoggerAwareTrait;
 	use HookableParent;
+
+	/**
+	 * Admin UI class instance.
+	 *
+	 * @var Admin
+	 */
+	private $admin;
 
 	/**
 	 * Plugin constructor.
@@ -39,6 +42,8 @@ class Plugin extends AbstractPlugin implements LoggerAwareInterface, HookableCol
 
 		$this->plugin_url       = $this->plugin_info->get_plugin_url();
 		$this->plugin_namespace = $this->plugin_info->get_text_domain();
+
+		$this->admin = new Admin();
 	}
 
 	/**
@@ -60,27 +65,27 @@ class Plugin extends AbstractPlugin implements LoggerAwareInterface, HookableCol
 	 */
 	public function hooks() {
 		parent::hooks();
-		add_action( 'admin_menu', array( Admin::class, 'init_admin_ui' ) );
-		add_action( 'admin_post_simple_products_export', array( $this, 'process_request' ) );
+		add_action( 'admin_menu', array( $this->admin, 'add_products_export_page' ) );
+		add_action( 'wp_ajax_simple_products_export', array( $this, 'process_request' ) );
 	}
 
 	/**
-	 * Create objects for getting and saving data, then send them to exporter and collect csv.
+	 * Enqueue script for AJAX exporting on admin page.
+	 */
+	public function admin_enqueue_scripts() {
+		if ( ! empty( get_current_screen()->id ) && 'product_page_export-products' === get_current_screen()->id ) {
+			wp_enqueue_script( 'simple-export-ajax', $this->get_plugin_assets_url() . 'js/simple-export-ajax.js', array( 'jquery' ), '1.1.0', true );
+			wp_localize_script( 'simple-export-ajax', 'simplePluginExport', array( 'ajaxUrl' => admin_url( 'admin-ajax.php' ) ) );
+		}
+	}
+
+	/**
+	 * Creates Request object and dispatches processing export.
 	 *
 	 * @return void
 	 */
 	public function process_request() {
-		$data   = new Product_Data( new WC_Product_Query( $this->query_arguments() ) );
-		$writer = Writer::createFromFileObject( new SplTempFileObject() );
-
-		$export = new Export( $data, $writer );
-		$export->export_file();
-		die;
-	}
-
-	private function query_arguments() {
-		return array(
-			'limit' => -1,
-		);
+		$request = new Request();
+		$request->process_request();
 	}
 }
